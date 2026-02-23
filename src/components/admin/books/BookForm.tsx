@@ -108,7 +108,7 @@ export function BookForm({
           <Field label="Description" error={form.formState.errors.description?.message}>
             <div className="space-y-2">
               <Button type="button" variant="outline" onClick={handleGenerateDescription} disabled={aiLoading}>
-                {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}Generate Description
+                {aiLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Sparkles className="mr-2 h-4 w-4" />}AI Generate Description
               </Button>
               <Textarea rows={5} {...form.register("description")} />
             </div>
