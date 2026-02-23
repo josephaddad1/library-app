@@ -17,6 +17,7 @@ import {
   BookOpen,
   ClipboardList,
   Tags,
+  Users,
   LogOut,
   Menu,
   X,
@@ -27,6 +28,7 @@ const navItems = [
   { label: "Books", href: "/admin/books", icon: BookOpen },
   { label: "Requests", href: "/admin/requests", icon: ClipboardList },
   { label: "Categories", href: "/admin/categories", icon: Tags },
+  { label: "Users", href: "/admin/users", icon: Users },
 ];
 
 export default function AdminLayout() {

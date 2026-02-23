@@ -9,6 +9,7 @@ export interface UserProfile {
   name: string;
   role: UserRole;
   disabled: boolean;
+  expiresAt?: Timestamp | null;
   createdAt: Timestamp;
 }
 

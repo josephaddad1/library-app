@@ -74,11 +74,18 @@ export default function BrowseBooks() {
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {filteredBooks.map((book) => (
           <Card key={book.id} className="overflow-hidden">
-            {book.coverUrl ? (
-              <img src={book.coverUrl} alt={book.title} className="h-48 w-full object-cover" />
-            ) : (
-              <div className="h-48 w-full bg-muted" />
-            )}
+            <div className="mx-auto w-full max-w-[220px] overflow-hidden bg-muted aspect-[2/3]">
+              {book.coverUrl ? (
+                <img
+                  src={book.coverUrl}
+                  alt={book.title}
+                  className="h-full w-full object-cover object-center"
+                  loading="lazy"
+                />
+              ) : (
+                <div className="h-full w-full bg-muted" />
+              )}
+            </div>
             <CardHeader className="space-y-2">
               <CardTitle className="line-clamp-1">{book.title}</CardTitle>
               <p className="text-sm text-muted-foreground">{book.author}</p>

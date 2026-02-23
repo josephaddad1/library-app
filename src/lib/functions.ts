@@ -1,22 +1,22 @@
-import { getFunctions, httpsCallable } from "firebase/functions";
+import {
+  generateBookDescription as generateBookDescriptionDirect,
+  type GenerateBookDescriptionInput,
+} from "./ai/generateBookDescription";
+import {
+  getBookRecommendations as getBookRecommendationsDirect,
+} from "./ai/getBookRecommendations";
 import type { Book } from "@/types/models";
-
-const functions = getFunctions();
-
-export type GenerateBookDescriptionInput = {
-  title: string;
-  author: string;
-  tags: string[];
-};
 
 export type GenerateBookDescriptionOutput = {
   description: string;
 };
 
-export const generateBookDescription = httpsCallable<
-  GenerateBookDescriptionInput,
-  GenerateBookDescriptionOutput
->(functions, "generateBookDescription");
+export async function generateBookDescription(
+  input: GenerateBookDescriptionInput,
+): Promise<{ data: GenerateBookDescriptionOutput }> {
+  const description = await generateBookDescriptionDirect(input);
+  return { data: { description } };
+}
 
 export type GetBookRecommendationsInput = {
   bookId: string;
@@ -27,13 +27,15 @@ export type GetBookRecommendationsInput = {
 };
 
 export type RecommendationResult = {
-  book: Pick<Book, "id" | "title" | "author" | "coverUrl" | "categoryId">;
+  book: Book;
   reason: string;
 };
 
 export type GetBookRecommendationsOutput = RecommendationResult[];
 
-export const getBookRecommendations = httpsCallable<
-  GetBookRecommendationsInput,
-  GetBookRecommendationsOutput
->(functions, "getBookRecommendations");
+export async function getBookRecommendations(
+  input: GetBookRecommendationsInput,
+): Promise<{ data: GetBookRecommendationsOutput }> {
+  const recommendations = await getBookRecommendationsDirect(input);
+  return { data: recommendations };
+}

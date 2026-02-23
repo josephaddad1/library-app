@@ -10,6 +10,7 @@ import AddBook from "@/pages/admin/AddBook";
 import EditBook from "@/pages/admin/EditBook";
 import BorrowRequests from "@/pages/admin/BorrowRequests";
 import ManageCategories from "@/pages/admin/ManageCategories";
+import ManageUsers from "@/pages/admin/ManageUsers";
 import UserDashboard from "@/pages/user/UserDashboard";
 import BrowseBooks from "@/pages/user/BrowseBooks";
 import BookDetail from "@/pages/user/BookDetail";
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: "books/:id/edit", element: <EditBook /> },
       { path: "requests", element: <BorrowRequests /> },
       { path: "categories", element: <ManageCategories /> },
+      { path: "users", element: <ManageUsers /> },
     ],
   },
   {

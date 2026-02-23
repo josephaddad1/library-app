@@ -12,7 +12,13 @@ import {
   signOut,
   type User,
 } from "firebase/auth";
-import { doc, getDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import {
+  doc,
+  getDoc,
+  setDoc,
+  serverTimestamp,
+  type Timestamp,
+} from "firebase/firestore";
 import { auth, db } from "@/lib/firebase";
 
 type UserRole = "admin" | "user";
@@ -33,13 +39,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
 
-  async function resolveUserRole(firebaseUser: User): Promise<UserRole> {
+  function isExpired(expiresAt?: Timestamp | null): boolean {
+    if (!expiresAt) return false;
+    return expiresAt.toMillis() <= Date.now();
+  }
+
+  async function resolveUserRole(firebaseUser: User): Promise<UserRole | null> {
     const userRef = doc(db, "users", firebaseUser.uid);
 
     try {
       const userDoc = await getDoc(userRef);
       if (userDoc.exists()) {
-        const role = userDoc.data().role;
+        const data = userDoc.data() as {
+          role?: UserRole;
+          disabled?: boolean;
+          expiresAt?: Timestamp | null;
+        };
+
+        if (data.disabled || isExpired(data.expiresAt)) {
+          await signOut(auth);
+          return null;
+        }
+
+        const role = data.role;
         return role === "admin" ? "admin" : "user";
       }
     } catch (error) {
@@ -56,6 +78,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           name: firebaseUser.displayName ?? firebaseUser.email?.split("@")[0] ?? "User",
           role: "user" as UserRole,
           disabled: false,
+          expiresAt: null,
           createdAt: serverTimestamp(),
         },
         { merge: true },
@@ -71,9 +94,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       try {
         if (firebaseUser) {
-          setUser(firebaseUser);
           const role = await resolveUserRole(firebaseUser);
-          setUserRole(role);
+          if (role) {
+            setUser(firebaseUser);
+            setUserRole(role);
+          } else {
+            setUser(null);
+            setUserRole(null);
+          }
         } else {
           setUser(null);
           setUserRole(null);
@@ -91,7 +119,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(email: string, password: string) {
-    await signInWithEmailAndPassword(auth, email, password);
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    const role = await resolveUserRole(credential.user);
+    if (!role) {
+      throw new Error("Account is disabled or expired.");
+    }
   }
 
   async function register(email: string, password: string, name: string) {
@@ -104,6 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         name,
         role: "user" as UserRole,
         disabled: false,
+        expiresAt: null,
         createdAt: serverTimestamp(),
       });
     } catch (error) {
